@@ -18,3 +18,4 @@ export class UserService {
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`/api/users/${userId}`);
   }
+}
