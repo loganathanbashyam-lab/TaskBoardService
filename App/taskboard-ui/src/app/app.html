@@ -1,0 +1,147 @@
+<div class="app-shell">
+  <header class="header">
+    <div>
+      <h1>TaskBoard UI</h1>
+      <p>Manage users, boards, and tasks for the backend API.</p>
+    </div>
+    <p class="hint">Backend API base path: <code>/api</code></p>
+  </header>
+
+  <section class="panel user-panel">
+    <h2>Users</h2>
+    <form [formGroup]="userForm" (ngSubmit)="createUser()" class="item-form">
+      <label>
+        Username
+        <input formControlName="username" placeholder="New user name" />
+      </label>
+      <button type="submit" [disabled]="userForm.invalid">Create user</button>
+    </form>
+
+    <div class="list-grid">
+      <div class="list-item" *ngFor="let user of users()">
+        <button
+          type="button"
+          class="user-button"
+          (click)="selectUser(user)"
+          [class.selected]="user.id === selectedUser()?.id"
+        >
+          {{ user.username }}
+        </button>
+        <button type="button" class="delete-button" (click)="deleteUser(user.id)">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel board-panel" *ngIf="selectedUser()">
+    <h2>Boards for {{ selectedUser()?.username }}</h2>
+    <form [formGroup]="boardForm" (ngSubmit)="createBoard()" class="item-form">
+      <label>
+        Board name
+        <input formControlName="name" placeholder="New board" />
+      </label>
+      <button type="submit" [disabled]="boardForm.invalid">Create board</button>
+    </form>
+
+    <div class="list-grid board-list">
+      <div class="board-card" *ngFor="let board of boards()">
+        <button
+          type="button"
+          class="board-button"
+          (click)="selectBoard(board)"
+          [class.selected]="board.id === selectedBoard()?.id"
+        >
+          {{ board.name }}
+        </button>
+        <button type="button" class="delete-button" (click)="deleteBoard(board.id)">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel task-panel" *ngIf="selectedBoard()">
+    <div class="task-panel-header">
+      <h2>Tasks for {{ selectedBoard()?.name }}</h2>
+      <button type="button" class="secondary" (click)="clearTaskEdit()">New task</button>
+    </div>
+
+    <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="task-form">
+      <div class="form-grid">
+        <label>
+          Title
+          <input formControlName="title" placeholder="Task title" />
+        </label>
+        <label>
+          Start date
+          <input type="date" formControlName="startDate" />
+        </label>
+        <label>
+          End date
+          <input type="date" formControlName="endDate" />
+        </label>
+        <label>
+          Assigned to
+          <input formControlName="assignedTo" placeholder="Assignee" />
+        </label>
+        <label>
+          Owner
+          <input formControlName="owner" placeholder="Owner" />
+        </label>
+        <label>
+          Priority
+          <select formControlName="priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </label>
+        <label>
+          Status
+          <select formControlName="status">
+            <option>New</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="taskForm.invalid">
+          {{ editingTask() ? 'Update Task' : 'Create Task' }}
+        </button>
+        <button type="button" class="secondary" (click)="clearTaskEdit()">Clear</button>
+      </div>
+
+      <p class="validation-error" *ngIf="taskForm.controls.startDate.value && taskForm.controls.endDate.value && taskForm.controls.startDate.value > taskForm.controls.endDate.value">
+        Start date cannot be after end date.
+      </p>
+    </form>
+
+    <div class="task-table">
+      <div class="task-row header">
+        <div>Title</div>
+        <div>Dates</div>
+        <div>Assigned</div>
+        <div>Owner</div>
+        <div>Priority</div>
+        <div>Status</div>
+        <div>Actions</div>
+      </div>
+      <div class="task-row" *ngFor="let task of tasks()">
+        <div>{{ task.title }}</div>
+        <div>{{ task.startDate }} → {{ task.endDate }}</div>
+        <div>{{ task.assignedTo }}</div>
+        <div>{{ task.owner }}</div>
+        <div>{{ task.priority }}</div>
+        <div>{{ task.status }}</div>
+        <div class="task-actions">
+          <button type="button" class="secondary" (click)="editTask(task)">Edit</button>
+          <button type="button" class="danger" (click)="deleteTask(task.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="error-banner" *ngIf="apiError()">
+    <span>{{ apiError() }}</span>
+    <button type="button" (click)="apiError.set(null)">Dismiss</button>
+  </div>
+</div>
